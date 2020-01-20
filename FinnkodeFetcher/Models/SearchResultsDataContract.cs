@@ -13,6 +13,7 @@ namespace FinnkodeFetcher.Models
         public List<SearchResultDataContract> SearchResults { get; set; }
 
         [MinLength(1)]
+        [Display(Name="Kode")]
         public string Code { get; set; }
     }
 }

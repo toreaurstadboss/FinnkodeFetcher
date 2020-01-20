@@ -10,7 +10,7 @@
         $.ajax({
             type: 'get',
             url: '@Url.Action("HarvestIcd10", "Home")',
-            data: { 'prefix': '@Model.Prefix' },
+            data: { 'prefix': '@Model.PrefixFrom' },
             success: function(data) {
                 console.log(data);
             },
@@ -50,15 +50,47 @@
             @Html.ValidationSummary(true)
 
             <form>
-                @Html.LabelFor(model => model.Prefix)
-                @Html.EditorFor(model => model.Prefix)
-                @Html.ValidationMessageFor(model => model.Prefix)
+                @Html.LabelFor(model => model.PrefixFrom)
+                @Html.EditorFor(model => model.PrefixFrom)
+                @Html.ValidationMessageFor(model => model.PrefixFrom)
                 <button type="submit" class="btn btn-success">Høst data</button>
             </form>
         }
         
         <div id="harvestresult" name="harvestresult"></div>
     </div>
+</div>
 
+<div class="row">
+    <div class="col-lg-12">
+
+        @using (Ajax.BeginForm("HarvestIntervalIcd10", new AjaxOptions
+        {
+            HttpMethod = "POST",
+            InsertionMode = InsertionMode.Replace,
+            UpdateTargetId = "harvestresult"
+
+        }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+
+            <form>
+                @Html.LabelFor(model => model.PrefixFrom)
+                @Html.EditorFor(model => model.PrefixFrom)
+                @Html.ValidationMessageFor(model => model.PrefixFrom)
+                
+                
+                @Html.LabelFor(model => model.PrefixTo)
+                @Html.EditorFor(model => model.PrefixTo)
+                @Html.ValidationMessageFor(model => model.PrefixTo)
+                
+
+                <button type="submit" class="btn btn-success">Høst intervall av data</button>
+            </form>
+        }
+
+        <div id="harvestresult" name="harvestresult"></div>
+    </div>
 </div>
 

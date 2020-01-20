@@ -1,7 +1,9 @@
 ﻿using FinnkodeFetcher.Models;
 using RestSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web.Mvc;
 using System.Xml.Linq;
 using FinnkodeFetcher.Common;
@@ -26,10 +28,24 @@ namespace FinnkodeFetcher.Controllers
             return View(harvestResultsModel);
         }
 
-        public string HarvestIcd10(string prefix)
+        [HttpPost]
+        public string HarvestIcd10(string prefixFrom)
         {
-            string reply = HarvestLogic(prefix);
+            string reply = HarvestLogic(prefixFrom);
             return reply;
+        }
+
+        [HttpPost]
+        public string HarvestIntervalIcd10(string prefixFrom, string prefixTo)
+        {
+            var stringBuilder = new StringBuilder();
+            List<string> prefixes = PrefixIntervalGenerator.GenerateSubchapters(prefixFrom, prefixTo);
+            prefixes.ForEach(prefix =>
+            {
+                string harvestResult = HarvestLogic(prefix);
+                stringBuilder.Append(harvestResult);
+            });
+            return stringBuilder.ToString();
         }
 
         private static string HarvestLogic(string prefix)
@@ -85,7 +101,6 @@ namespace FinnkodeFetcher.Controllers
             reply = "ICD10 codes updated at: " + DateTime.Now;
             return reply;
         }
-
 
         [HttpPost]
         public PartialViewResult SearchIcd10(string code)
