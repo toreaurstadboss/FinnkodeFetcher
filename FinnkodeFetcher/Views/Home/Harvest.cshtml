@@ -1,0 +1,64 @@
+﻿@model FinnkodeFetcher.Models.HarvestResultsDataContract
+
+<div class="jumbotron">
+    <h2>FinnkodeFetcher v0.1</h2>
+</div>
+
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+    function SearchIcd10() {
+        $.ajax({
+            type: 'get',
+            url: '@Url.Action("HarvestIcd10", "Home")',
+            data: { 'prefix': '@Model.Prefix' },
+            success: function(data) {
+                console.log(data);
+            },
+            dataType: 'json'
+        });
+    }
+
+    function onSearchIcd10Callback(json) {
+
+        var tr;
+        //Append each row to html table
+        for (var i = 0; i < json.length; i++) {
+            tr = $('<tr/>');
+            //tr.append("<td>" + json[i].Id + "</td>");
+            //tr.append("<td>" + json[i].Name + "</td>");
+            //tr.append("<td>" + json[i].City + "</td>");
+            //tr.append("<td>" + json[i].Address + "</td>");
+            $('table').append(tr);
+        }
+
+    }
+
+</script>
+
+<div class="row">
+    <div class="col-lg-12">
+
+        @using (Ajax.BeginForm("HarvestIcd10", new AjaxOptions
+        {
+            HttpMethod = "POST",
+            InsertionMode = InsertionMode.Replace,
+            UpdateTargetId = "harvestresult"
+
+        }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true)
+
+            <form>
+                @Html.LabelFor(model => model.Prefix)
+                @Html.EditorFor(model => model.Prefix)
+                @Html.ValidationMessageFor(model => model.Prefix)
+                <button type="submit" class="btn btn-success">Høst data</button>
+            </form>
+        }
+        
+        <div id="harvestresult" name="harvestresult"></div>
+    </div>
+
+</div>
+
