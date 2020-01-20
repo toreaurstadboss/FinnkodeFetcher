@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FinnkodeFetcher.Models;
+using RestSharp;
+using System;
 using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.Mvc;
 using System.Xml.Linq;
-using FinnkodeFetcher.Models;
-using Newtonsoft.Json;
-using RestSharp;
-using System.Linq;
+using FinnkodeFetcher.Common;
 
 namespace FinnkodeFetcher.Controllers
 {
@@ -33,24 +29,40 @@ namespace FinnkodeFetcher.Controllers
             request.AddParameter("application/json", "{\"searchExpression\":\"" + code + "\",\"sources\":[{\"SearchSourceId\":\"ICD10SysDel\",\"Selected\":true}],\"page\":1,\"start\":0,\"limit\":25}",  ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
             Console.WriteLine(response.Content);
-
+            var result = new SearchResultsDataContract();
+            
             var xmlDoc = XDocument.Parse(response.Content);
             //var jsonDoc = JsonConvert.SerializeObject(xmlDoc);
 
-            var records = xmlDoc.Root.Elements("record");
-            var result = new SearchResultsDataContract();
-            foreach (var record in records)
+            if (xmlDoc.Root != null)
             {
-                var item = new SearchResultDataContract
+                var records = xmlDoc.Root.Elements("record");
+                foreach (var record in records)
                 {
-                    Code = record.Element("code").Value,
-                    Text = record.Element("title").Value
-                };
-                result.SearchResults.Add(item);
+                    var item = new SearchResultDataContract
+                    {
+                        Code = record.Element("code")?.Value,
+                        Text = record.Element("title")?.Value
+                    };
+                    if (string.IsNullOrEmpty(item.Code) || string.IsNullOrEmpty(item.Text) || item.Code.Contains("(")
+                        || !item.Code.StartsWith(code, StringComparison.InvariantCultureIgnoreCase) || !item.Code.Contains("."))
+                    {
+                        continue;
+                    }
+                    //replace the "." sign
+                    item.Code = item.Code.Replace(".", "");
+                    result.SearchResults.Add(item);
+                }
+                result.Code = code;
             }
 
-            result.Code = code;
+            if (result.SearchResults.Any())
+            {
+                result.SearchResults = result.SearchResults.OrderBy(item => item.Code, new AlphanumericComparator<string>()).ToList();
+
+            }
             return PartialView("_SearchResults", result);
         }
+
     }
 }
